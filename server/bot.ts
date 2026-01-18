@@ -1,6 +1,11 @@
 import { Telegraf, Context, Scenes, session } from 'telegraf';
 import { storage } from './storage';
+import { db } from './db';
+import { users } from '@shared/schema';
+import { eq } from 'drizzle-orm';
 import { insertCaseSchema, insertUserSchema } from '@shared/schema';
+import path from 'path';
+import fs from 'fs';
 
 if (!process.env.TELEGRAM_BOT_TOKEN) {
   throw new Error('TELEGRAM_BOT_TOKEN must be set');
@@ -17,14 +22,38 @@ export async function sendMessageToUser(telegramId: string, message: string) {
   }
 }
 
+// Function to set bot photo
+async function setBotPhoto() {
+  try {
+    const photoPath = path.resolve(process.cwd(), 'attached_assets/generated_images/cybersecurity_assistant_bot_profile_picture.png');
+    if (fs.existsSync(photoPath)) {
+      await bot.telegram.setChatPhoto(process.env.TELEGRAM_BOT_TOKEN!.split(':')[0], { source: photoPath });
+      console.log('Bot photo updated successfully');
+    }
+  } catch (error) {
+    console.error('Error setting bot photo:', error);
+  }
+}
+
 // --- Scenes for Multi-step conversation ---
 const { BaseScene, Stage } = Scenes;
 
 const reportScene = new BaseScene<any>('REPORT_SCENE');
 
 reportScene.enter((ctx) => {
-  ctx.reply('Bienvenido al sistema de asistencia. Vamos a registrar tu caso.\n\n¿Cuál es tu nombre completo?');
-  ctx.scene.session.state = { step: 'name' };
+  ctx.reply('🛡️ *Bienvenido al Sistema de Asistencia para Víctimas de Delitos Informáticos*\n\nEstoy aquí para ayudarte a registrar tu caso de forma segura y profesional.\n\nPara comenzar, ¿qué tipo de delito deseas reportar?', {
+    parse_mode: 'Markdown',
+    reply_markup: {
+      keyboard: [
+        [{ text: 'Phishing (Suplantación)' }, { text: 'Hackeo de WhatsApp' }],
+        [{ text: 'Hackeo de Email' }, { text: 'Extorsión' }],
+        [{ text: 'Otro' }]
+      ],
+      one_time_keyboard: true,
+      resize_keyboard: true
+    }
+  });
+  ctx.scene.session.state = { step: 'crime_type' };
 });
 
 reportScene.on('text', async (ctx) => {
@@ -32,60 +61,64 @@ reportScene.on('text', async (ctx) => {
   const text = ctx.message.text;
 
   switch (state.step) {
-    case 'name':
+    case 'crime_type':
+      state.crimeType = text;
+      state.step = 'full_name';
+      ctx.reply('Entendido. Ahora iniciaremos con tus *Datos Personales*.\n\nPor favor, ingresa tu *Nombre Completo*:', { parse_mode: 'Markdown' });
+      break;
+    case 'full_name':
       state.fullName = text;
-      state.step = 'id';
-      ctx.reply('Gracias. Ahora, ingresa tu número de cédula o identificación:');
+      state.step = 'id_number';
+      ctx.reply('Gracias. Ahora, ingresa tu *Número de Cédula o Identificación*:', { parse_mode: 'Markdown' });
       break;
-    case 'id':
+    case 'id_number':
       state.idNumber = text;
-      state.step = 'type';
-      ctx.reply('¿Qué tipo de delito deseas reportar?', {
-        reply_markup: {
-          keyboard: [
-            [{ text: 'phishing' }, { text: 'hackeo_whatsapp' }],
-            [{ text: 'hackeo_email' }, { text: 'extorsion' }],
-            [{ text: 'otro' }]
-          ],
-          one_time_keyboard: true,
-          resize_keyboard: true
-        }
-      });
+      state.step = 'age';
+      ctx.reply('¿Cuál es tu *edad*? (Por favor, ingresa solo números):', { parse_mode: 'Markdown' });
       break;
-    case 'type':
-      state.type = text;
-      state.step = 'description';
-      ctx.reply('Describe brevemente lo sucedido:');
+    case 'age':
+      const age = parseInt(text);
+      if (isNaN(age)) {
+        return ctx.reply('Por favor, ingresa una edad válida (solo números).');
+      }
+      state.age = age;
+      state.step = 'confirm_initial';
+      ctx.reply(`Gracias. Hemos registrado los primeros datos:\n\n*Tipo:* ${state.crimeType}\n*Nombre:* ${state.fullName}\n*ID:* ${state.idNumber}\n*Edad:* ${state.age}\n\n¿Deseas continuar con el resto del reporte? (Responde "si" para guardar este borrador y seguir)`, { parse_mode: 'Markdown' });
       break;
-    case 'description':
-      state.description = text;
-      state.step = 'confirm';
-      ctx.reply(`Resumen del reporte:\nNombre: ${state.fullName}\nTipo: ${state.type}\nDescripción: ${state.description}\n\n¿Es correcto? (Responde "si" para confirmar)`);
-      break;
-    case 'confirm':
+    case 'confirm_initial':
       if (text.toLowerCase() === 'si') {
         try {
-          // 1. Create/Update User
           let user = await storage.getUserByTelegramId(ctx.from.id.toString());
           if (!user) {
             user = await storage.createUser({
               telegramId: ctx.from.id.toString(),
               fullName: state.fullName,
               identificationNumber: state.idNumber,
+              age: state.age,
               role: 'user'
             });
+          } else {
+            // Update user if exists
+            await db.update(users).set({
+              fullName: state.fullName,
+              identificationNumber: state.idNumber,
+              age: state.age,
+              updatedAt: new Date()
+            }).where(eq(users.id, user.id));
           }
 
-          // 2. Create Case
           const newCase = await storage.createCase({
             userId: user.id,
-            type: state.type as any,
+            type: state.crimeType.toLowerCase().includes('phishing') ? 'phishing' : 
+                  state.crimeType.toLowerCase().includes('whatsapp') ? 'hackeo_whatsapp' :
+                  state.crimeType.toLowerCase().includes('email') ? 'hackeo_email' :
+                  state.crimeType.toLowerCase().includes('extorsion') ? 'extorsion' : 'otro',
             status: 'nuevo',
-            description: state.description,
+            description: 'Registro inicial de datos personales completado.',
             incidentDate: new Date(),
           });
 
-          ctx.reply(`✅ Caso registrado exitosamente.\nNúmero de caso: ${newCase.caseNumber}\n\nUn asesor revisará tu reporte pronto.`);
+          ctx.reply(`✅ *Borrador Guardado*\nNúmero de caso: \`${newCase.caseNumber}\`\n\nHe completado los primeros 3 pasos de tu reporte. Un asesor ha sido notificado y puede contactarte por este medio pronto.\n\nUsa /nuevo_caso si deseas iniciar otro reporte o espera el contacto del asesor.`, { parse_mode: 'Markdown' });
         } catch (error) {
           console.error('Bot Error:', error);
           ctx.reply('Lo siento, hubo un error al guardar tu reporte. Por favor intenta más tarde.');
@@ -142,6 +175,9 @@ bot.help((ctx) => {
 export function startBot() {
   bot.launch();
   console.log('Telegram Bot started');
+
+  // Try to set photo on startup
+  setBotPhoto();
 
   // Enable graceful stop
   process.once('SIGINT', () => bot.stop('SIGINT'));
