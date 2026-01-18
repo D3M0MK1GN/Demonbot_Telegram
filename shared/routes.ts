@@ -4,7 +4,8 @@ import {
   insertCaseSchema, 
   insertEvidenceSchema, 
   insertReportedNumberSchema,
-  users, cases, evidences, reportedNumbers, botInteractions
+  insertMessageSchema,
+  users, cases, evidences, reportedNumbers, botInteractions, messages
 } from './schema';
 
 export const errorSchemas = {
@@ -44,7 +45,7 @@ export const api = {
         200: z.array(z.object({
           type: z.string(),
           count: z.number(),
-          fill: z.string().optional(), // For charts
+          fill: z.string().optional(),
         })),
       },
     },
@@ -98,13 +99,33 @@ export const api = {
         404: errorSchemas.notFound,
       },
     },
+    messages: {
+      list: {
+        method: 'GET' as const,
+        path: '/api/cases/:id/messages',
+        responses: {
+          200: z.array(z.custom<typeof messages.$inferSelect>()),
+          404: errorSchemas.notFound,
+        },
+      },
+      send: {
+        method: 'POST' as const,
+        path: '/api/cases/:id/messages',
+        input: z.object({ content: z.string() }),
+        responses: {
+          201: z.custom<typeof messages.$inferSelect>(),
+          400: errorSchemas.validation,
+          404: errorSchemas.notFound,
+        },
+      },
+    },
   },
   users: {
     active: {
       method: 'GET' as const,
       path: '/api/users/active',
       responses: {
-        200: z.array(z.custom<typeof users.$inferSelect & { lastActive: string }>()), // Mocking active sessions
+        200: z.array(z.custom<typeof users.$inferSelect & { lastActive: string }>()),
       },
     },
   },

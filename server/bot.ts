@@ -8,6 +8,15 @@ if (!process.env.TELEGRAM_BOT_TOKEN) {
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
+// Export for sending messages from backend
+export async function sendMessageToUser(telegramId: string, message: string) {
+  try {
+    await bot.telegram.sendMessage(telegramId, message);
+  } catch (error) {
+    console.error('Error sending message to Telegram:', error);
+  }
+}
+
 // --- Scenes for Multi-step conversation ---
 const { BaseScene, Stage } = Scenes;
 
@@ -92,6 +101,32 @@ reportScene.on('text', async (ctx) => {
 const stage = new Stage([reportScene]);
 bot.use(session());
 bot.use(stage.middleware());
+
+// Handle incoming messages from user (not in scene) to route to chat
+bot.on('text', async (ctx, next) => {
+  if (ctx.message.text.startsWith('/')) return next();
+  
+  const telegramId = ctx.from.id.toString();
+  const user = await storage.getUserByTelegramId(telegramId);
+  
+  if (user) {
+    // Find active case for this user
+    const userCases = await storage.getCases(1, 0);
+    const activeCase = userCases.find(c => c.userId === user.id && c.status !== 'cerrado');
+    
+    if (activeCase) {
+      await storage.createMessage({
+        caseId: activeCase.id,
+        senderId: user.id,
+        content: ctx.message.text,
+        fromAdmin: false
+      });
+      return; // Handled
+    }
+  }
+  
+  return next();
+});
 
 // --- Commands ---
 bot.start((ctx) => {

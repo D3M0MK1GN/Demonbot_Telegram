@@ -87,6 +87,34 @@ export async function registerRoutes(
     res.json(numbers);
   });
 
+  // Chat Messages
+  app.get(api.cases.messages.list.path, async (req, res) => {
+    const caseId = Number(req.params.id);
+    const messages = await storage.getMessages(caseId);
+    res.json(messages);
+  });
+
+  app.post(api.cases.messages.send.path, async (req, res) => {
+    const caseId = Number(req.params.id);
+    const { content } = req.body;
+    
+    // Create internal message
+    const message = await storage.createMessage({
+      caseId,
+      content,
+      fromAdmin: true
+    });
+
+    // Send to Telegram
+    const caseData = await storage.getCase(caseId);
+    if (caseData?.user?.telegramId) {
+      const { sendMessageToUser } = await import("./bot");
+      await sendMessageToUser(caseData.user.telegramId, `[Asesor]: ${content}`);
+    }
+
+    res.status(201).json(message);
+  });
+
   // Seed Data function
   await seedDatabase();
 

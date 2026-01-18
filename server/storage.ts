@@ -39,6 +39,10 @@ export interface IStorage {
   getTopReportedNumbers(limit?: number): Promise<ReportedNumber[]>;
   createReportedNumber(data: InsertReportedNumber): Promise<ReportedNumber>;
 
+  // Chat
+  getMessages(caseId: number): Promise<Message[]>;
+  createMessage(data: { caseId: number; senderId?: number; content: string; fromAdmin?: boolean }): Promise<Message>;
+
   // Evidences
   createEvidence(data: InsertEvidence): Promise<Evidence>;
   getEvidencesByCaseId(caseId: number): Promise<Evidence[]>;
@@ -181,6 +185,17 @@ export class DatabaseStorage implements IStorage {
   async createReportedNumber(data: InsertReportedNumber): Promise<ReportedNumber> {
     const [newReport] = await db.insert(reportedNumbers).values(data).returning();
     return newReport;
+  }
+
+  async getMessages(caseId: number): Promise<Message[]> {
+    return await db.select().from(messages)
+      .where(eq(messages.caseId, caseId))
+      .orderBy(messages.createdAt);
+  }
+
+  async createMessage(data: { caseId: number; senderId?: number; content: string; fromAdmin?: boolean }): Promise<Message> {
+    const [newMessage] = await db.insert(messages).values(data).returning();
+    return newMessage;
   }
 
   async createEvidence(data: InsertEvidence): Promise<Evidence> {
