@@ -1,0 +1,269 @@
+🎯 Objetivo del Sistema
+Crear un sistema completo de asistencia para víctimas de delitos informáticos que incluya:
+
+Bot conversacional en Telegram para registro de casos
+Backend API RESTful con FastAPI
+Base de datos PostgreSQL robusta
+Dashboard web en tiempo real para monitoreo
+
+
+🏗️ Arquitectura del Sistema
+Stack Tecnológico:
+
+Bot: Python + python-telegram-bot
+Backend API: Python + FastAPI
+Base de Datos: PostgreSQL 14+
+Dashboard: React + Recharts + TailwindCSS
+WebSockets: Para actualización en tiempo real
+Contenedores: Docker + Docker Compose
+Web Server: Nginx
+
+
+📊 Base de Datos PostgreSQL
+Tablas Principales:
+
+users - Información de usuarios/víctimas
+
+ID, telegram_id, nombre_completo, cédula, edad, profesión, lugar_residencia, teléfono
+Timestamps: created_at, updated_at
+
+
+cases - Casos registrados
+
+ID, user_id, numero_caso (único auto-generado)
+tipo_delito (ENUM: phishing, hackeo_whatsapp, hackeo_email, extorsión, etc.)
+estado (ENUM: nuevo, en_proceso, denunciado, resuelto, cerrado)
+descripcion_hechos, fecha_incidente, monto_perdido
+numero_sospechoso, entidad_bancaria
+compartio_codigo_otp, realizo_transferencias
+aplicacion_comprometida, dispositivo_afectado
+pais, ciudad
+
+
+evidences - Evidencias adjuntas
+
+ID, case_id, tipo (captura_pantalla, documento, url_maliciosa, audio, video)
+file_path, file_id, descripcion
+
+
+bot_interactions - Log de interacciones
+
+ID, user_id, telegram_id, mensaje, tipo_accion, metadata (JSONB)
+timestamp
+
+
+reported_numbers - Números telefónicos reportados
+
+ID, numero, veces_reportado, tipo_fraude, pais_origen
+ultima_fecha_reporte
+
+
+active_sessions - Sesiones activas del bot
+
+ID, telegram_id, user_id, estado_conversacion
+datos_temporales (JSONB), ultima_actividad
+
+
+
+Vistas para Analytics:
+
+dashboard_stats - Estadísticas generales
+casos_por_tipo - Distribución por tipo de delito
+top_numeros_reportados - Números más reportados
+
+Funciones Automáticas:
+
+generate_case_number() - Genera números de caso únicos (formato: CASE-YYYYMMDD-XXXX)
+update_updated_at_column() - Actualiza timestamp automáticamente
+
+
+🤖 Bot de Telegram
+Flujo Conversacional (17 Estados):
+
+Inicio - Mensaje de bienvenida
+Tipo de Delito - Selección con teclado personalizado
+Datos Personales:
+
+Nombre completo
+Número de cédula
+Edad (validación numérica)
+Profesión
+Lugar de residencia (ciudad, país)
+
+
+Detalles del Incidente:
+
+Descripción detallada (personalizada según tipo de delito)
+Fecha y hora del incidente
+Número sospechoso (si aplica)
+Monto perdido (validación numérica)
+Entidad bancaria (si aplica)
+¿Compartió código OTP? (Sí/No)
+¿Realizó transferencias? (Sí/No)
+Aplicación comprometida
+Dispositivo afectado
+
+
+Evidencias:
+
+Opción de subir capturas de pantalla
+Documentos
+Múltiples archivos
+
+
+Confirmación:
+
+Resumen completo del caso
+Validación final
+Generación de número de caso
+
+
+Guía Inmediata:
+
+Recomendaciones personalizadas según tipo de delito
+Acciones urgentes
+Pasos de preservación de evidencia
+Información sobre denuncia formal
+
+
+
+Características del Bot:
+
+Validación de datos en tiempo real
+Mensajes contextuales según tipo de delito
+Registro de todas las interacciones
+Actualización de sesiones activas
+Manejo de errores robusto
+Comandos: /start, /nuevo_caso, /cancel
+
+
+🚀 API Backend (FastAPI)
+Endpoints Principales:
+Estadísticas:
+
+GET /api/stats - Estadísticas generales del dashboard
+GET /api/estadisticas-avanzadas - Métricas detalladas
+
+Casos:
+
+GET /api/casos-por-tipo - Distribución por tipo de delito
+GET /api/casos-recientes?limit=50 - Casos más recientes
+GET /api/casos-por-fecha?dias=30 - Timeline de casos
+GET /api/casos-por-ciudad?limit=10 - Casos por ubicación
+GET /api/caso/{numero_caso} - Detalle completo de un caso
+PUT /api/caso/{numero_caso}/estado - Actualizar estado
+
+Usuarios:
+
+GET /api/usuarios-activos - Usuarios conectados (últimos 5 min)
+
+Números Reportados:
+
+GET /api/top-numeros-reportados - Top números maliciosos
+GET /api/buscar-numero/{numero} - Buscar si un número fue reportado
+
+WebSocket:
+
+WS /ws/dashboard - Conexión para actualizaciones en tiempo real
+
+Características:
+
+CORS configurado para permitir frontend
+Pool de conexiones a PostgreSQL
+Validación con Pydantic
+Actualización en tiempo real vía WebSockets
+Manejo de errores HTTP apropiado
+Documentación automática en /docs
+
+
+📊 Dashboard Web (React)
+Componentes Visuales:
+KPIs Principales (Cards):
+
+Total usuarios registrados
+Total casos
+Usuarios activos en tiempo real
+Casos nuevos hoy
+Casos en proceso
+Pérdidas monetarias totales
+Casos resueltos
+
+Gráficos:
+
+Pie Chart: Distribución de casos por tipo de delito
+Line Chart: Tendencia de casos en últimos 7 días
+Bar Chart: Casos por ciudad
+
+Tablas en Tiempo Real:
+
+Usuarios activos (últimos 5 minutos)
+
+Nombre, estado de conversación, última actividad
+Indicador visual de actividad (pulso verde)
+
+
+Casos recientes (últimos 10)
+
+Número de caso, usuario, tipo, estado
+Descripción resumida, monto perdido
+Badges de colores según estado
+
+
+Top números reportados (8 más reportados)
+
+Número, veces reportado, tipo de fraude
+
+
+
+Características:
+
+Actualización automática cada 5 segundos
+Diseño responsive (Tailwind CSS)
+Tema oscuro con efectos glassmorphism
+Animaciones suaves
+Indicadores visuales de estado en vivo
+Traducción de tipos y estados al español
+
+
+🐳 Despliegue con Docker
+Contenedores:
+
+postgres - Base de datos PostgreSQL 14
+
+Volumen persistente para datos
+Inicialización automática con schema.sql
+Health check configurado
+
+
+api - Backend FastAPI
+
+Construido desde Dockerfile.api
+Expone puerto 8000
+Conecta con postgres
+Volúmenes: uploads, logs
+
+
+bot - Bot de Telegram
+
+Construido desde Dockerfile.bot
+Conecta con postgres y api
+Volúmenes: uploads, logs
+Reinicio automático
+
+
+dashboard - Frontend con Nginx
+
+Sirve archivos estáticos
+Proxy inverso para API
+WebSocket habilitado
+Expone puerto 80
+
+
+
+Redes:
+
+Red interna delitos_network tipo bridge
+
+
+⚙️ Configuración
+Variables de Entorno (.env):
