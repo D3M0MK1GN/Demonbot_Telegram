@@ -19,7 +19,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <p className="text-sm font-mono text-muted-foreground mb-1">{label}</p>
         <p className="text-lg font-bold text-white">
           {payload[0].value}
-          <span className="text-xs ml-1 text-primary">casos</span>
+          <span className="text-xs ml-1 text-primary"> casos</span>
         </p>
       </div>
     );

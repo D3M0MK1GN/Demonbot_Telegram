@@ -32,8 +32,8 @@ export default function CaseDetail() {
     return (
       <Layout>
         <div className="text-center py-20">
-          <h2 className="text-xl font-bold text-white">Case Not Found</h2>
-          <Link href="/cases" className="text-primary hover:underline mt-4 inline-block">Return to list</Link>
+          <h2 className="text-xl font-bold text-white">Caso No Encontrado</h2>
+          <Link href="/cases" className="text-primary hover:underline mt-4 inline-block">Regresar a la lista</Link>
         </div>
       </Layout>
     );
@@ -42,7 +42,7 @@ export default function CaseDetail() {
   const handleStatusChange = (val: string) => {
     updateStatus.mutate({ id, status: val as any }, {
       onSuccess: () => {
-        toast({ title: "Status Updated", description: `Case status changed to ${val.replace('_', ' ')}` });
+        toast({ title: "Estado Actualizado", description: `El estado del caso cambió a ${val.replace('_', ' ')}` });
       }
     });
   };
@@ -58,19 +58,19 @@ export default function CaseDetail() {
         <div>
           <h1 className="text-3xl font-display font-bold text-white font-mono">{caseData.caseNumber}</h1>
           <p className="text-muted-foreground flex items-center gap-2 text-sm">
-            Created on {format(new Date(caseData.createdAt!), 'PPP')}
+            Creado el {format(new Date(caseData.createdAt!), 'PPP')}
           </p>
         </div>
         <div className="ml-auto flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-muted-foreground">Status:</span>
+            <span className="text-sm font-medium text-muted-foreground">Estado:</span>
             <Select 
               value={caseData.status} 
               onValueChange={handleStatusChange}
               disabled={updateStatus.isPending}
             >
               <SelectTrigger className="w-[180px] bg-card border-white/10 capitalize">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder="Estado" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="nuevo">Nuevo</SelectItem>
@@ -90,10 +90,10 @@ export default function CaseDetail() {
           <div className="glass-panel p-6 rounded-xl">
             <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
               <FileText className="w-5 h-5 text-primary" />
-              Incident Description
+              Descripción del Incidente
             </h3>
             <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
-              {caseData.description || "No description provided."}
+              {caseData.description || "No se proporcionó descripción."}
             </p>
           </div>
 
@@ -101,7 +101,7 @@ export default function CaseDetail() {
           <div className="glass-panel p-6 rounded-xl">
             <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-primary" />
-              Evidence
+              Evidencia
             </h3>
             {caseData.evidences && caseData.evidences.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -110,14 +110,14 @@ export default function CaseDetail() {
                     {/* Placeholder for evidence display logic */}
                     <span className="text-xs text-muted-foreground uppercase">{ev.type}</span>
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Button size="sm" variant="secondary">View</Button>
+                      <Button size="sm" variant="secondary">Ver</Button>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground bg-black/20 rounded-lg border border-white/5 border-dashed">
-                No evidence attached yet.
+                No hay evidencia adjunta aún.
               </div>
             )}
           </div>
@@ -126,12 +126,12 @@ export default function CaseDetail() {
         {/* Sidebar Info */}
         <div className="space-y-6">
           <div className="glass-panel p-6 rounded-xl space-y-4">
-            <h3 className="text-lg font-semibold text-white mb-4">Case Details</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">Detalles del Caso</h3>
             
             <div className="flex items-center justify-between py-2 border-b border-white/5">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <DollarSign className="w-4 h-4" />
-                Amount Lost
+                Monto Perdido
               </div>
               <span className="font-mono text-white font-medium">
                 {caseData.amountLost ? `$${Number(caseData.amountLost).toLocaleString()}` : 'N/A'}
@@ -141,37 +141,37 @@ export default function CaseDetail() {
             <div className="flex items-center justify-between py-2 border-b border-white/5">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Smartphone className="w-4 h-4" />
-                Suspect Phone
+                Teléfono Sospechoso
               </div>
               <span className="font-mono text-white">
-                {caseData.suspectNumber || 'Unknown'}
+                {caseData.suspectNumber || 'Desconocido'}
               </span>
             </div>
 
             <div className="flex items-center justify-between py-2 border-b border-white/5">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Landmark className="w-4 h-4" />
-                Bank Entity
+                Entidad Bancaria
               </div>
               <span className="text-white capitalize">
-                {caseData.bankEntity || 'Unknown'}
+                {caseData.bankEntity || 'Desconocida'}
               </span>
             </div>
 
             <div className="flex items-center justify-between py-2 border-b border-white/5">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <MapPin className="w-4 h-4" />
-                Location
+                Ubicación
               </div>
               <span className="text-white">
-                {caseData.city}, {caseData.country || 'Unknown'}
+                {caseData.city}, {caseData.country || 'Desconocido'}
               </span>
             </div>
 
             <div className="flex items-center justify-between py-2">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Calendar className="w-4 h-4" />
-                Incident Date
+                Fecha del Incidente
               </div>
               <span className="text-white text-sm">
                 {caseData.incidentDate ? format(new Date(caseData.incidentDate), 'MMM d, yyyy') : '-'}
@@ -180,20 +180,20 @@ export default function CaseDetail() {
           </div>
 
           <div className="glass-panel p-6 rounded-xl">
-            <h3 className="text-lg font-semibold text-white mb-4">Victim Profile</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">Perfil de la Víctima</h3>
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xl font-bold">
                 {caseData.user?.fullName?.substring(0, 2).toUpperCase() || 'U'}
               </div>
               <div>
-                <p className="font-medium text-white">{caseData.user?.fullName || 'Anonymous'}</p>
+                <p className="font-medium text-white">{caseData.user?.fullName || 'Anónimo'}</p>
                 <p className="text-xs text-muted-foreground font-mono">{caseData.user?.telegramId}</p>
               </div>
             </div>
             <div className="space-y-2 text-sm">
               <p className="text-muted-foreground">ID: <span className="text-white ml-2">{caseData.user?.identificationNumber || '-'}</span></p>
-              <p className="text-muted-foreground">Phone: <span className="text-white ml-2">{caseData.user?.phoneNumber || '-'}</span></p>
-              <p className="text-muted-foreground">City: <span className="text-white ml-2">{caseData.user?.residenceCity || '-'}</span></p>
+              <p className="text-muted-foreground">Teléfono: <span className="text-white ml-2">{caseData.user?.phoneNumber || '-'}</span></p>
+              <p className="text-muted-foreground">Ciudad: <span className="text-white ml-2">{caseData.user?.residenceCity || '-'}</span></p>
             </div>
           </div>
         </div>
