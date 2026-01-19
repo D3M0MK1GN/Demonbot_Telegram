@@ -1,10 +1,8 @@
 import { 
-  users, cases, evidences, reportedNumbers, botInteractions,
+  users, cases, evidences, reportedNumbers, botInteractions, messages,
   type User, type InsertUser,
   type Case, type InsertCase,
-  type Evidence, type InsertEvidence,
-  type ReportedNumber, type InsertReportedNumber,
-  type BotInteraction, type InsertBotInteraction
+  type Evidence, type Message
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, count, sql, and, gte } from "drizzle-orm";
@@ -193,7 +191,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(messages.createdAt);
   }
 
-  async createMessage(data: { caseId: number; senderId?: number; content: string; fromAdmin?: boolean }): Promise<Message> {
+  async createMessage(data: any): Promise<Message> {
     const [newMessage] = await db.insert(messages).values(data).returning();
     return newMessage;
   }

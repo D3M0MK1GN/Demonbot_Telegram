@@ -11,14 +11,16 @@ export const crimeTypeEnum = pgEnum("crime_type", ["phishing", "hackeo_whatsapp"
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   telegramId: text("telegram_id").unique(),
+  telegramUsername: text("telegram_username"),
   fullName: text("full_name"),
   identificationNumber: text("identification_number"),
   age: integer("age"),
+  birthDate: timestamp("birth_date"),
   profession: text("profession"),
-  residenceCity: text("residence_city"),
-  residenceCountry: text("residence_country"),
+  address: text("address"),
   phoneNumber: text("phone_number"),
   role: text("role").default("user"), // user, admin
+  lastIp: text("last_ip"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -121,5 +123,14 @@ export const insertMessageSchema = createInsertSchema(messages).omit({ id: true,
 
 // Types
 export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Case = typeof cases.$inferSelect;
+export type InsertCase = z.infer<typeof insertCaseSchema>;
 export type Message = typeof messages.$inferSelect;
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type Evidence = typeof evidences.$inferSelect;
+export type InsertEvidence = z.infer<typeof insertMessageSchema>; // Temporarily
+export type ReportedNumber = typeof reportedNumbers.$inferSelect;
+export type InsertReportedNumber = z.infer<typeof insertMessageSchema>; // Temporarily
+export type BotInteraction = typeof botInteractions.$inferSelect;
+export type InsertBotInteraction = z.infer<typeof insertMessageSchema>; // Temporarily

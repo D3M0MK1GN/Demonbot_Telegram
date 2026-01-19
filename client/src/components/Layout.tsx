@@ -1,17 +1,20 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, FileText, PhoneOff, ShieldAlert, LogOut, Menu } from "lucide-react";
+import { LayoutDashboard, FileText, PhoneOff, ShieldAlert, LogOut, Menu, MessageSquare } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { CaseChat } from "@/components/CaseChat";
+import { useChat } from "@/hooks/use-chat";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
-  { href: "/cases", label: "Cases", icon: <FileText className="w-5 h-5" /> },
-  { href: "/reports", label: "Fraud DB", icon: <PhoneOff className="w-5 h-5" /> },
+  { href: "/", label: "Panel de Control", icon: <LayoutDashboard className="w-5 h-5" /> },
+  { href: "/cases", label: "Reportes de Incidentes", icon: <FileText className="w-5 h-5" /> },
+  { href: "/reports", label: "Base de Fraude", icon: <PhoneOff className="w-5 h-5" /> },
 ];
 
 function SidebarContent() {
   const [location] = useLocation();
+  const { openChat } = useChat();
 
   return (
     <div className="flex flex-col h-full bg-card/50 backdrop-blur-xl border-r border-white/5">
@@ -22,7 +25,7 @@ function SidebarContent() {
           </div>
           <div>
             <h1 className="font-display font-bold text-lg text-white tracking-tight">CYBERGUARD</h1>
-            <p className="text-xs text-muted-foreground font-mono">VICTIM SUPPORT</p>
+            <p className="text-xs text-muted-foreground font-mono">APOYO A VÍCTIMAS</p>
           </div>
         </div>
       </div>
@@ -47,10 +50,18 @@ function SidebarContent() {
         })}
       </nav>
 
-      <div className="p-4 border-t border-white/5">
+      <div className="p-4 border-t border-white/5 space-y-2">
+        <Button 
+          onClick={() => openChat("GENERAL", "Soporte")}
+          variant="ghost" 
+          className="w-full justify-start text-muted-foreground hover:text-primary hover:bg-primary/5 gap-3"
+        >
+          <MessageSquare className="w-5 h-5" />
+          Asistencia
+        </Button>
         <button className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:bg-red-500/10 hover:text-red-400 transition-colors">
           <LogOut className="w-5 h-5" />
-          Disconnect
+          Desconectar
         </button>
       </div>
     </div>
@@ -58,8 +69,10 @@ function SidebarContent() {
 }
 
 export function Layout({ children }: { children: ReactNode }) {
+  const { chats } = useChat();
+
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
+    <div className="flex min-h-screen bg-background text-foreground relative">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:block w-72 fixed inset-y-0 left-0 z-50">
         <SidebarContent />
@@ -85,6 +98,15 @@ export function Layout({ children }: { children: ReactNode }) {
           {children}
         </div>
       </main>
+
+      {/* Global Chat Component - Support for multiple chats */}
+      <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
+        <div className="pointer-events-auto contents">
+          {chats.map((chat, index) => (
+            <CaseChat key={chat.id} chat={chat} index={index} />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

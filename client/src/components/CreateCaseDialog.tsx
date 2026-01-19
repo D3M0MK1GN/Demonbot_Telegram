@@ -55,29 +55,29 @@ export function CreateCaseDialog({ open, onOpenChange }: { open: boolean; onOpen
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] bg-card border-white/10 text-foreground">
         <DialogHeader>
-          <DialogTitle className="text-xl font-display font-bold">Log New Cybercrime Incident</DialogTitle>
+          <DialogTitle className="text-xl font-display font-bold">Registrar Nuevo Incidente de Ciberdelito</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="type">Crime Type</Label>
+              <Label htmlFor="type">Tipo de Delito</Label>
               <Select onValueChange={(val) => setValue("type", val as any)} defaultValue="otro">
                 <SelectTrigger className="bg-background/50 border-white/10">
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder="Seleccionar tipo" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="phishing">Phishing</SelectItem>
-                  <SelectItem value="hackeo_whatsapp">WhatsApp Hack</SelectItem>
-                  <SelectItem value="hackeo_email">Email Hack</SelectItem>
-                  <SelectItem value="extorsion">Extortion</SelectItem>
-                  <SelectItem value="otro">Other</SelectItem>
+                  <SelectItem value="hackeo_whatsapp">Hackeo WhatsApp</SelectItem>
+                  <SelectItem value="hackeo_email">Hackeo Email</SelectItem>
+                  <SelectItem value="extorsion">Extorsión</SelectItem>
+                  <SelectItem value="otro">Otro</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="amountLost">Amount Lost (USD)</Label>
+              <Label htmlFor="amountLost">Monto Perdido (COP)</Label>
               <Input 
                 id="amountLost" 
                 type="number" 
@@ -89,33 +89,33 @@ export function CreateCaseDialog({ open, onOpenChange }: { open: boolean; onOpen
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="suspectNumber">Suspect Phone</Label>
+              <Label htmlFor="suspectNumber">Teléfono Sospechoso</Label>
               <Input 
                 id="suspectNumber" 
                 {...register("suspectNumber")} 
                 className="bg-background/50 border-white/10"
-                placeholder="+1 234 567 890"
+                placeholder="+57 300 000 0000"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="bankEntity">Bank Entity</Label>
+              <Label htmlFor="bankEntity">Entidad Bancaria</Label>
               <Input 
                 id="bankEntity" 
                 {...register("bankEntity")} 
                 className="bg-background/50 border-white/10"
-                placeholder="Bank Name"
+                placeholder="Nombre del Banco"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Incident Description</Label>
+            <Label htmlFor="description">Descripción del Incidente</Label>
             <Textarea 
               id="description" 
               {...register("description")} 
               className="bg-background/50 border-white/10 min-h-[100px]"
-              placeholder="Describe what happened..."
+              placeholder="Describe lo que sucedió..."
             />
           </div>
 
@@ -126,14 +126,14 @@ export function CreateCaseDialog({ open, onOpenChange }: { open: boolean; onOpen
               onClick={() => onOpenChange(false)} 
               className="mr-2"
             >
-              Cancel
+              Cancelar
             </Button>
             <Button 
               type="submit" 
               disabled={createCase.isPending}
               className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              {createCase.isPending ? "Creating..." : "Create Case"}
+              {createCase.isPending ? "Creando..." : "Crear Reporte"}
             </Button>
           </div>
         </form>

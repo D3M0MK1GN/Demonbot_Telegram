@@ -8,6 +8,7 @@ import Dashboard from "@/pages/Dashboard";
 import Cases from "@/pages/Cases";
 import CaseDetail from "@/pages/CaseDetail";
 import Reports from "@/pages/Reports";
+import { ChatProvider } from "@/hooks/use-chat";
 
 function Router() {
   return (
@@ -24,10 +25,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <ChatProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </ChatProvider>
     </QueryClientProvider>
   );
 }

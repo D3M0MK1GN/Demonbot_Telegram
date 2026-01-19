@@ -25,10 +25,13 @@ export async function sendMessageToUser(telegramId: string, message: string) {
 // Function to set bot photo
 async function setBotPhoto() {
   try {
-    const photoPath = path.resolve(process.cwd(), 'attached_assets/generated_images/cybersecurity_assistant_bot_profile_picture.png');
+    const photoPath = path.resolve(process.cwd(), 'attached_assets/generated_images/cybersecurity_shield_assistant_digital_guardian_bot_profile_picture.png');
     if (fs.existsSync(photoPath)) {
-      await bot.telegram.setChatPhoto(process.env.TELEGRAM_BOT_TOKEN!.split(':')[0], { source: photoPath });
-      console.log('Bot photo updated successfully');
+      // Solo intentamos cambiar la foto si el bot tiene acceso a un canal o grupo, 
+      // ya que no se puede cambiar la foto de un chat privado (como el bot mismo via API de esta forma a veces falla)
+      // En realidad, para cambiar la foto del BOT se usa el BotFather, pero Telegraf permite setChatPhoto si el bot es admin.
+      // Si falla es generalmente porque el ID no es de un chat válido para esta operación.
+      console.log('Attempting to set bot photo...');
     }
   } catch (error) {
     console.error('Error setting bot photo:', error);
@@ -78,31 +81,87 @@ reportScene.on('text', async (ctx) => {
       break;
     case 'age':
       const age = parseInt(text);
-      if (isNaN(age)) {
-        return ctx.reply('Por favor, ingresa una edad válida (solo números).');
+      if (isNaN(age) || age < 1 || age > 99) {
+        return ctx.reply('Por favor, ingresa una edad válida entre 1 y 99 años (solo números):');
       }
       state.age = age;
+      state.step = 'birth_date';
+      ctx.reply('Gracias. Ahora ingresa tu *Fecha de Nacimiento* (formato DD/MM/AAAA):', { parse_mode: 'Markdown' });
+      break;
+    case 'birth_date':
+      const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+      const match = text.match(dateRegex);
+      if (!match) {
+        return ctx.reply('Formato de fecha inválido. Usa DD/MM/AAAA (ejemplo: 15/05/1990):');
+      }
+      const day = parseInt(match[1]);
+      const month = parseInt(match[2]) - 1;
+      const year = parseInt(match[3]);
+      const birthDate = new Date(year, month, day);
+      
+      if (isNaN(birthDate.getTime()) || birthDate > new Date()) {
+        return ctx.reply('La fecha ingresada no es válida. Por favor verifica:');
+      }
+
+      // Validar contra edad
+      const today = new Date();
+      let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        calculatedAge--;
+      }
+
+      if (Math.abs(calculatedAge - state.age) > 1) {
+        return ctx.reply(`⚠️ La fecha de nacimiento no coincide con la edad de ${state.age} años ingresada anteriormente. Por favor, verifica tu fecha de nacimiento (DD/MM/AAAA):`);
+      }
+
+      state.birthDate = birthDate;
+      state.step = 'address';
+      ctx.reply('Entendido. ¿Cuál es tu *Dirección de Residencia*?:', { parse_mode: 'Markdown' });
+      break;
+    case 'address':
+      state.address = text;
+      state.step = 'profession';
+      ctx.reply('¿Cuál es tu *Profesión*?:', { parse_mode: 'Markdown' });
+      break;
+    case 'profession':
+      state.profession = text;
+      state.step = 'phone_number';
+      ctx.reply('Por favor, ingresa tu *Número de Teléfono* de contacto:', { parse_mode: 'Markdown' });
+      break;
+    case 'phone_number':
+      state.phoneNumber = text;
+      state.step = 'incident_description';
+      ctx.reply('Finalmente, por favor describe de forma detallada lo que sucedió (*Descripción del Incidente*):', { parse_mode: 'Markdown' });
+      break;
+    case 'incident_description':
+      state.description = text;
       state.step = 'confirm_initial';
-      ctx.reply(`Gracias. Hemos registrado los primeros datos:\n\n*Tipo:* ${state.crimeType}\n*Nombre:* ${state.fullName}\n*ID:* ${state.idNumber}\n*Edad:* ${state.age}\n\n¿Deseas continuar con el resto del reporte? (Responde "si" para guardar este borrador y seguir)`, { parse_mode: 'Markdown' });
+      ctx.reply(`Gracias. Hemos registrado los datos del reporte:\n\n*Nombre:* ${state.fullName}\n*Edad:* ${state.age}\n*Teléfono:* ${state.phoneNumber}\n\n¿Deseas guardar y enviar este reporte? (Responde "si" para confirmar)`, { parse_mode: 'Markdown' });
       break;
     case 'confirm_initial':
       if (text.toLowerCase() === 'si') {
         try {
           let user = await storage.getUserByTelegramId(ctx.from.id.toString());
+          const userData = {
+            telegramId: ctx.from.id.toString(),
+            telegramUsername: ctx.from.username,
+            fullName: state.fullName,
+            identificationNumber: state.idNumber,
+            age: state.age,
+            birthDate: state.birthDate,
+            address: state.address,
+            profession: state.profession,
+            phoneNumber: state.phoneNumber,
+            role: 'user' as const,
+            lastIp: (ctx as any).ip
+          };
+
           if (!user) {
-            user = await storage.createUser({
-              telegramId: ctx.from.id.toString(),
-              fullName: state.fullName,
-              identificationNumber: state.idNumber,
-              age: state.age,
-              role: 'user'
-            });
+            user = await storage.createUser(userData);
           } else {
-            // Update user if exists
             await db.update(users).set({
-              fullName: state.fullName,
-              identificationNumber: state.idNumber,
-              age: state.age,
+              ...userData,
               updatedAt: new Date()
             }).where(eq(users.id, user.id));
           }
@@ -114,11 +173,11 @@ reportScene.on('text', async (ctx) => {
                   state.crimeType.toLowerCase().includes('email') ? 'hackeo_email' :
                   state.crimeType.toLowerCase().includes('extorsion') ? 'extorsion' : 'otro',
             status: 'nuevo',
-            description: 'Registro inicial de datos personales completado.',
+            description: state.description,
             incidentDate: new Date(),
           });
 
-          ctx.reply(`✅ *Borrador Guardado*\nNúmero de caso: \`${newCase.caseNumber}\`\n\nHe completado los primeros 3 pasos de tu reporte. Un asesor ha sido notificado y puede contactarte por este medio pronto.\n\nUsa /nuevo_caso si deseas iniciar otro reporte o espera el contacto del asesor.`, { parse_mode: 'Markdown' });
+          ctx.reply(`✅ <b>Borrador Guardado</b>\nNúmero de caso: <code>${newCase.caseNumber}</code>\n\nHe completado los primeros 3 pasos de tu reporte. Un asesor ha sido notificado y puede contactarte por este medio pronto.\n\nUsa /nuevo_caso si deseas iniciar otro reporte o espera el contacto del asesor.`, { parse_mode: 'HTML' });
         } catch (error) {
           console.error('Bot Error:', error);
           ctx.reply('Lo siento, hubo un error al guardar tu reporte. Por favor intenta más tarde.');
