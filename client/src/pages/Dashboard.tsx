@@ -19,7 +19,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <p className="text-sm font-mono text-muted-foreground mb-1">{label}</p>
         <p className="text-lg font-bold text-white">
           {payload[0].value}
-          <span className="text-xs ml-1 text-primary">cases</span>
+          <span className="text-xs ml-1 text-primary">casos</span>
         </p>
       </div>
     );
@@ -54,7 +54,7 @@ export default function Dashboard() {
           animate={{ opacity: 1, x: 0 }}
           className="text-3xl font-display font-bold text-white mb-2"
         >
-          Operations Center
+          Centro de Operaciones
         </motion.h1>
         <motion.p 
           initial={{ opacity: 0, x: -20 }}
@@ -62,40 +62,40 @@ export default function Dashboard() {
           transition={{ delay: 0.1 }}
           className="text-muted-foreground"
         >
-          Real-time overview of cybercrime incidents and victim support.
+          Resumen en tiempo real de incidentes de cibercrimen y apoyo a víctimas.
         </motion.p>
       </header>
 
       {/* KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <KPICard 
-          title="Total Cases" 
+          title="Casos Totales" 
           value={dashboard?.totalCases || 0} 
           icon={<Briefcase className="w-6 h-6" />}
-          trend="+12% vs last week"
+          trend="+12% vs semana pasada"
           trendUp={false} // increasing crime is bad
           delay={0}
         />
         <KPICard 
-          title="New Today" 
+          title="Nuevos Hoy" 
           value={dashboard?.newCasesToday || 0} 
           icon={<Activity className="w-6 h-6" />}
-          trend="Active now"
+          trend="Activos ahora"
           trendUp={true}
           delay={1}
         />
         <KPICard 
-          title="Total Loss" 
+          title="Pérdida Total" 
           value={`$${Number(dashboard?.totalAmountLost || 0).toLocaleString()}`} 
           icon={<DollarSign className="w-6 h-6" />}
           className="border-primary/20 shadow-[0_0_20px_-10px_var(--primary)]"
           delay={2}
         />
         <KPICard 
-          title="Resolved" 
+          title="Resueltos" 
           value={dashboard?.casesResolved || 0} 
           icon={<CheckCircle className="w-6 h-6" />}
-          trend="Resolution rate 45%"
+          trend="Tasa de resolución 45%"
           trendUp={true}
           delay={3}
         />
@@ -112,7 +112,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-display font-semibold text-lg flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-primary" />
-              Incident Trend
+              Tendencia de Incidentes
             </h3>
             <div className="flex gap-2">
               {['7d', '30d', '90d'].map(range => (
@@ -169,7 +169,7 @@ export default function Dashboard() {
         >
           <h3 className="font-display font-semibold text-lg mb-6 flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-accent" />
-            Attack Vectors
+            Vectores de Ataque
           </h3>
           <div className="h-[300px] w-full relative">
             <ResponsiveContainer width="100%" height="100%">
@@ -218,20 +218,20 @@ export default function Dashboard() {
           <div className="p-6 border-b border-white/5 flex items-center justify-between">
             <h3 className="font-display font-semibold text-lg flex items-center gap-2">
               <Smartphone className="w-5 h-5 text-rose-500" />
-              High Risk Numbers
+              Números de Alto Riesgo
             </h3>
             <span className="text-xs font-mono text-rose-400 bg-rose-500/10 px-2 py-1 rounded border border-rose-500/20">
-              FRAUD DATABASE
+              BASE DE DATOS DE FRAUDE
             </span>
           </div>
           <div className="p-0">
             <table className="w-full text-sm text-left">
               <thead className="bg-white/5 text-muted-foreground font-mono text-xs uppercase">
                 <tr>
-                  <th className="px-6 py-3 font-medium">Number</th>
-                  <th className="px-6 py-3 font-medium">Reports</th>
-                  <th className="px-6 py-3 font-medium">Type</th>
-                  <th className="px-6 py-3 font-medium text-right">Last Active</th>
+                  <th className="px-6 py-3 font-medium">Número</th>
+                  <th className="px-6 py-3 font-medium">Reportes</th>
+                  <th className="px-6 py-3 font-medium">Tipo</th>
+                  <th className="px-6 py-3 font-medium text-right">Última Actividad</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -243,7 +243,7 @@ export default function Dashboard() {
                         {item.reportCount}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-muted-foreground capitalize">{item.fraudType || 'Unknown'}</td>
+                    <td className="px-6 py-4 text-muted-foreground capitalize">{item.fraudType || 'Desconocido'}</td>
                     <td className="px-6 py-4 text-right text-muted-foreground font-mono text-xs">
                       {item.lastReportedAt ? format(new Date(item.lastReportedAt), 'MMM d, HH:mm') : '-'}
                     </td>
@@ -252,7 +252,7 @@ export default function Dashboard() {
                 {(!topNumbers || topNumbers.length === 0) && (
                   <tr>
                     <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground italic">
-                      No reports yet.
+                      Sin reportes aún.
                     </td>
                   </tr>
                 )}
@@ -271,14 +271,14 @@ export default function Dashboard() {
           <div className="p-6 border-b border-white/5 flex items-center justify-between">
             <h3 className="font-display font-semibold text-lg flex items-center gap-2">
               <Users className="w-5 h-5 text-emerald-500" />
-              Live Active Users
+              Usuarios Activos
             </h3>
             <div className="flex items-center gap-2">
               <span className="relative flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
               </span>
-              <span className="text-xs font-mono text-emerald-400">LIVE FEED</span>
+              <span className="text-xs font-mono text-emerald-400">EN VIVO</span>
             </div>
           </div>
           <div className="p-0">
@@ -290,19 +290,19 @@ export default function Dashboard() {
                       {user.fullName?.substring(0, 2).toUpperCase() || 'UN'}
                     </div>
                     <div>
-                      <p className="font-medium text-white text-sm">{user.fullName || 'Anonymous User'}</p>
+                      <p className="font-medium text-white text-sm">{user.fullName || 'Usuario Anónimo'}</p>
                       <p className="text-xs text-muted-foreground font-mono">{user.telegramId}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs font-mono text-emerald-400">Online</p>
-                    <p className="text-[10px] text-muted-foreground">Last seen: {format(new Date(), 'HH:mm')}</p>
+                    <p className="text-xs font-mono text-emerald-400">En línea</p>
+                    <p className="text-[10px] text-muted-foreground">Visto: {format(new Date(), 'HH:mm')}</p>
                   </div>
                 </div>
               ))}
               {(!activeUsers || activeUsers.length === 0) && (
                 <div className="px-6 py-8 text-center text-muted-foreground italic">
-                  No active users currently.
+                  No hay usuarios activos actualmente.
                 </div>
               )}
             </div>

@@ -33,8 +33,8 @@ export default function Cases() {
     <Layout>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-display font-bold text-white mb-2">Case Management</h1>
-          <p className="text-muted-foreground">Manage and track victim support cases.</p>
+          <h1 className="text-3xl font-display font-bold text-white mb-2">Gestión de Casos</h1>
+          <p className="text-muted-foreground">Administre y realice seguimiento de los casos de apoyo a víctimas.</p>
         </div>
         <div className="flex items-center gap-3">
           <Button 
@@ -42,18 +42,17 @@ export default function Cases() {
             onClick={() => setIsCreateOpen(true)}
           >
             <Plus className="w-4 h-4 mr-2" />
-            New Case
+            Nuevo Caso
           </Button>
         </div>
       </div>
 
-      {/* Filters and Search */}
       <div className="flex flex-col md:flex-row gap-4 mb-6 bg-card/30 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input 
             type="text" 
-            placeholder="Search by case number, name, or phone..." 
+            placeholder="Buscar por número de caso, nombre o teléfono..." 
             className="w-full bg-background/50 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all"
           />
         </div>
@@ -69,7 +68,7 @@ export default function Cases() {
                   : "bg-white/5 text-muted-foreground hover:bg-white/10 border border-transparent"
               }`}
             >
-              {status.replace('_', ' ')}
+              {status === 'all' ? 'Todos' : status.replace('_', ' ')}
             </button>
           ))}
         </div>
@@ -81,7 +80,7 @@ export default function Cases() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {cases?.map((c, idx) => {
+          {cases?.map((c: any, idx: number) => {
             const Icon = typeIcons[c.type as keyof typeof typeIcons] || AlertCircle;
             return (
               <motion.div
@@ -106,17 +105,17 @@ export default function Cases() {
 
                     <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div>
-                        <p className="text-xs text-muted-foreground font-mono uppercase">Victim</p>
-                        <p className="text-sm font-medium text-white truncate">{c.user?.fullName || 'Anonymous'}</p>
+                        <p className="text-xs text-muted-foreground font-mono uppercase">Víctima</p>
+                        <p className="text-sm font-medium text-white truncate">{c.user?.fullName || 'Anónimo'}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground font-mono uppercase">Amount Lost</p>
+                        <p className="text-xs text-muted-foreground font-mono uppercase">Pérdida</p>
                         <p className="text-sm font-medium text-white font-mono">
                           {c.amountLost ? `$${Number(c.amountLost).toLocaleString()}` : '-'}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground font-mono uppercase">Incident Date</p>
+                        <p className="text-xs text-muted-foreground font-mono uppercase">Fecha Incidente</p>
                         <p className="text-sm font-medium text-muted-foreground">
                           {c.incidentDate ? format(new Date(c.incidentDate), 'MMM d, yyyy') : '-'}
                         </p>
@@ -140,8 +139,8 @@ export default function Cases() {
           {(!cases || cases.length === 0) && (
             <div className="text-center py-20 bg-card/30 rounded-xl border border-white/5 border-dashed">
               <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <h3 className="text-lg font-medium text-white">No cases found</h3>
-              <p className="text-muted-foreground">Try adjusting your filters or create a new case.</p>
+              <h3 className="text-lg font-medium text-white">No se encontraron casos</h3>
+              <p className="text-muted-foreground">Intente ajustar sus filtros o cree un nuevo caso.</p>
             </div>
           )}
         </div>

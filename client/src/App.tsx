@@ -8,7 +8,7 @@ import Dashboard from "@/pages/Dashboard";
 import Cases from "@/pages/Cases";
 import CaseDetail from "@/pages/CaseDetail";
 import Reports from "@/pages/Reports";
-import { ChatProvider } from "@/hooks/use-chat";
+import { ChatProvider } from "@/hooks/use-cases";
 
 function Router() {
   return (

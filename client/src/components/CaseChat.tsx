@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useChat, ChatInstance } from "@/hooks/use-chat";
+import { useChat, ChatInstance } from "@/hooks/use-cases";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Message {

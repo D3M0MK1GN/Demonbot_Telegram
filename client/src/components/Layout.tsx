@@ -4,7 +4,7 @@ import { LayoutDashboard, FileText, PhoneOff, ShieldAlert, LogOut, Menu, Message
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { CaseChat } from "@/components/CaseChat";
-import { useChat } from "@/hooks/use-chat";
+import { useChat } from "@/hooks/use-cases";
 
 const navItems = [
   { href: "/", label: "Panel de Control", icon: <LayoutDashboard className="w-5 h-5" /> },
